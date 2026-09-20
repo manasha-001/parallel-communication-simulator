@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Parallel Communication Interface Simulator | ECE Lab</title>
+
+<style>
+:root {
+    --bg-color: #0f172a;
+    --card-bg: #1e293b;
+    --text-color: #f8fafc;
+    --accent-green: #22c55e;
+    --accent-blue: #3b82f6;
+    --accent-red: #ef4444;
+    --accent-yellow: #eab308;
+    --border-color: #334155;
+    --glow-green: rgba(34, 197, 94, 0.4);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    padding: 20px;
+    min-height: 100vh;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 25px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--border-color);
+}
+
+header h1 {
+    font-size: 2rem;
+    color: var(--accent-blue);
+    margin-bottom: 5px;
+}
+
+header p {
+    color: #94a3b8;
+    font-size: 0.95rem;
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.full-width {
+    grid-column: 1 / -1;
+}
+
+.card {
+    background-color: var(--card-bg);
+    border-radius: 12px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3);
+}
+
+.card h2 {
+    font-size: 1.25rem;
+    margin-bottom: 15px;
+    color: var(--accent-blue);
+}
+
+.bit-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    margin: 15px 0;
+}
+
+.bit-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.bit-btn {
+    width: 100%;
+    height: 50px;
+    background-color: #0f172a;
+    border: 2px solid var(--border-color);
+    color: #64748b;
+    font-weight: bold;
+    font-size: 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.bit-btn.active {
+    background-color: var(--accent-green);
+    color: #000;
+    border-color: var(--accent-green);
+    box-shadow: 0 0 12px var(--glow-green);
+}
+
+.bit-label {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 5px;
+    font-weight: bold;
+}
+
+.input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 10px 15px;
+    border-radius: 6px;
+    border: 1px solid var(--border-color);
+    background-color: #0f172a;
+    color: white;
+    font-size: 1rem;
+}
+
+.action-btn {
+    padding: 10px 20px;
+    background-color: var(--accent-blue);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.action-btn:hover {
+    background-color: #2563eb;
+}
+
+.action-btn:disabled {
+    background-color: #475569;
+    cursor: not-allowed;
+}
+
+.signal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.signal-card {
+    background: #0f172a;
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.signal-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #475569;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.signal-indicator.active {
+    background-color: var(--accent-yellow);
+    box-shadow: 0 0 8px var(--accent-yellow);
+}
+
+.led-grid {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.led-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.led {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background-color: #334155;
+    border: 2px solid #475569;
+}
+
+.led.on {
+    background-color: var(--accent-green);
+    box-shadow: 0 0 15px var(--accent-green);
+    border-color: #86efac;
+}
+
+.readout-box {
+    background-color: #0f172a;
+    border-radius: 8px;
+    padding: 15px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    text-align: center;
+    border: 1px solid var(--border-color);
+}
+
+.readout-item span {
+    display: block;
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.readout-item strong {
+    font-size: 1.2rem;
+    color: var(--accent-green);
+    font-family: monospace;
+}
+
+canvas {
+    width: 100%;
+    height: 200px;
+    background-color: #090d16;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.terminal {
+    background-color: #050811;
+    font-family: 'Courier New', monospace;
+    padding: 12px;
+    border-radius: 8px;
+    height: 140px;
+    overflow-y: auto;
+    color: #38bdf8;
+    font-size: 0.85rem;
+    border: 1px solid var(--border-color);
+}
+
+.terminal p {
+    margin-bottom: 4px;
+}
+
+.theory {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    font-size: 0.9rem;
+    color: #cbd5e1;
+}
+
+.theory ul {
+    padding-left: 20px;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .container {
+        grid-template-columns: 1fr;
+    }
+
+    .full-width {
+        grid-column: auto;
+    }
+
+    .readout-box {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .theory {
+        grid-template-columns: 1fr;
+    }
+
+    .input-group {
+        flex-direction: column;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>⚡ 8-Bit Parallel Communication Interface Simulator</h1>
+    <p>
+        Department of Electronics & Communication Engineering (ECE)
+        — Interactive Hardware Simulation
+    </p>
+</header>
+
+<div class="container">
+
+<!-- TRANSMITTER -->
+<div class="card">
+
+<h2>📤 Transmitter Unit (TX)</h2>
+
+<p style="font-size:0.85rem;color:#94a3b8;margin-bottom:12px;">
+Toggle bits manually or enter a character to load data onto the
+8-bit parallel bus (D7 MSB - D0 LSB).
+</p>
+
+<div class="input-group">
+
+<input
+type="text"
+id="textInput"
+maxlength="1"
+placeholder="Type a character (e.g. A)"
+>
+
+<button class="action-btn" onclick="loadChar()">
+Load Character
+</button>
+
+</div>
+
+<div class="bit-container" id="bitContainer"></div>
+
+<div class="signal-grid">
+
+<div class="signal-card">
+<div>
+<span class="signal-indicator" id="ind-strobe"></span>
+<strong>STROBE</strong>
+</div>
+<span style="font-size:0.75rem;color:#94a3b8;">
+Data Valid Signal
+</span>
+</div>
+
+<div class="signal-card">
+<div>
+<span class="signal-indicator" id="ind-busy"></span>
+<strong>BUSY</strong>
+</div>
+<span style="font-size:0.75rem;color:#94a3b8;">
+Receiver Processing
+</span>
+</div>
+
+<div class="signal-card">
+<div>
+<span class="signal-indicator" id="ind-ack"></span>
+<strong>ACK</strong>
+</div>
+<span style="font-size:0.75rem;color:#94a3b8;">
+Acknowledge Pulse
+</span>
+</div>
+
+</div>
+
+<div style="margin-top:15px;">
+
+<button
+class="action-btn"
+id="transmitBtn"
+style="width:100%;font-size:1.1rem;"
+onclick="transmitData()"
+>
+🚀 Transmit Data Byte
+</button>
+
+</div>
+
+</div>
+
+
+<!-- RECEIVER -->
+<div class="card">
+
+<h2>📥 Receiver Unit (RX)</h2>
+
+<p style="font-size:0.85rem;color:#94a3b8;margin-bottom:12px;">
+Parallel Data Bus Lines — LEDs light up when bit logic level = HIGH / 1.
+</p>
+
+<div class="led-grid" id="ledGrid"></div>
+
+<div class="readout-box">
+
+<div class="readout-item">
+<span>Binary</span>
+<strong id="readout-bin">00000000</strong>
+</div>
+
+<div class="readout-item">
+<span>Hexadecimal</span>
+<strong id="readout-hex">0x00</strong>
+</div>
+
+<div class="readout-item">
+<span>Decimal</span>
+<strong id="readout-dec">0</strong>
+</div>
+
+<div class="readout-item">
+<span>ASCII Char</span>
+<strong id="readout-ascii">NUL</strong>
+</div>
+
+</div>
+
+<h3 style="font-size:0.9rem;margin:15px 0 8px;color:#94a3b8;">
+Communication Activity Log:
+</h3>
+
+<div class="terminal" id="terminalLog">
+
+<p>[System] Simulator initialized.</p>
+<p>[System] Ready for transmission...</p>
+
+</div>
+
+</div>
+
+
+<!-- WAVEFORM -->
+<div class="card full-width">
+
+<h2>📈 Digital Oscilloscope / Timing Diagram</h2>
+
+<p style="font-size:0.85rem;color:#94a3b8;margin-bottom:10px;">
+Visualizing the parallel bus handshake sequence:
+STROBE → BUSY → ACK.
+</p>
+
+<canvas id="waveformCanvas"></canvas>
+
+</div>
+
+
+<!-- THEORY -->
+<div class="card full-width">
+
+<h2>📚 ECE Theory: Parallel vs. Serial Communication</h2>
+
+<div class="theory">
+
+<div>
+
+<h3 style="color:var(--accent-green);margin-bottom:8px;">
+Key Characteristics of Parallel Interface
+</h3>
+
+<ul>
+
+<li>
+<strong>Simultaneous Transmission:</strong>
+All 8 bits can be transferred at the same time using
+separate data lines.
+</li>
+
+<li>
+<strong>Handshaking:</strong>
+Control signals such as STROBE, BUSY and ACK
+help synchronize the transfer.
+</li>
+
+<li>
+<strong>High Throughput:</strong>
+Multiple bits can be transferred in one communication cycle.
+</li>
+
+</ul>
+
+</div>
+
+
+<div>
+
+<h3 style="color:var(--accent-red);margin-bottom:8px;">
+Design Trade-offs & Limitations
+</h3>
+
+<ul>
+
+<li>
+<strong>Clock Skew:</strong>
+Different propagation delays can affect timing.
+</li>
+
+<li>
+<strong>Crosstalk:</strong>
+Adjacent signal lines may interfere with each other.
+</li>
+
+<li>
+<strong>Bulky Cabling:</strong>
+More physical data lines are required compared with
+single-line serial communication.
+</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<script>
+
+// ================================
+// DATA STATE
+// ================================
+
+let bitState = [0,0,0,0,0,0,0,0];
+
+let isTransmitting = false;
+
+let waveformHistory = [];
+
+
+// ================================
+// CREATE BIT BUTTONS
+// ================================
+
+const bitContainer = document.getElementById("bitContainer");
+
+for(let i = 7; i >= 0; i--) {
+
+    const box = document.createElement("div");
+
+    box.className = "bit-box";
+
+    box.innerHTML = `
+        <button
+            class="bit-btn"
+            id="bit-${i}"
+            onclick="toggleBit(${i})"
+        >
+            0
+        </button>
+
+        <span class="bit-label">
+            D${i}
+        </span>
+    `;
+
+    bitContainer.appendChild(box);
+}
+
+
+// ================================
+// CREATE RECEIVER LEDs
+// ================================
+
+const ledGrid = document.getElementById("ledGrid");
+
+for(let i = 7; i >= 0; i--) {
+
+    const item = document.createElement("div");
+
+    item.className = "led-item";
+
+    item.innerHTML = `
+        <div class="led" id="led-${i}"></div>
+        <span class="bit-label">D${i}</span>
+    `;
+
+    ledGrid.appendChild(item);
+}
+
+
+// ================================
+// TOGGLE BIT
+// ================================
+
+function toggleBit(bitIndex) {
+
+    if(isTransmitting) return;
+
+    bitState[bitIndex] =
+        bitState[bitIndex] === 0 ? 1 : 0;
+
+    updateUI();
+}
+
+
+// ================================
+// LOAD CHARACTER
+// ================================
+
+function loadChar() {
+
+    if(isTransmitting) return;
+
+    const input =
+        document.getElementById("textInput").value;
+
+    if(!input) return;
+
+    const charCode =
+        input.charCodeAt(0);
+
+    if(charCode > 255) {
+
+        alert("Please enter a standard ASCII character.");
+
+        return;
+    }
+
+    for(let i = 0; i < 8; i++) {
+
+        bitState[i] =
+            (charCode >> i) & 1;
+    }
+
+    updateUI();
+
+    logTerminal(
+        `Loaded character '${input}' — Decimal: ${charCode}`
+    );
+}
+
+
+// ================================
+// UPDATE TX BUTTONS
+// ================================
+
+function updateUI() {
+
+    for(let i = 0; i < 8; i++) {
+
+        const btn =
+            document.getElementById(`bit-${i}`);
+
+        if(bitState[i] === 1) {
+
+            btn.classList.add("active");
+
+            btn.innerText = "1";
+
+        } else {
+
+            btn.classList.remove("active");
+
+            btn.innerText = "0";
+        }
+    }
+}
+
+
+// ================================
+// TERMINAL LOG
+// ================================
+
+function logTerminal(message) {
+
+    const terminal =
+        document.getElementById("terminalLog");
+
+    const p =
+        document.createElement("p");
+
+    const time =
+        new Date().toLocaleTimeString();
+
+    p.innerText =
+        `[${time}] ${message}`;
+
+    terminal.appendChild(p);
+
+    terminal.scrollTop =
+        terminal.scrollHeight;
+}
+
+
+// ================================
+// SIGNAL CONTROL
+// ================================
+
+function setSignal(id,state) {
+
+    const element =
+        document.getElementById(id);
+
+    if(state) {
+
+        element.classList.add("active");
+
+    } else {
+
+        element.classList.remove("active");
+    }
+}
+
+
+// ================================
+// TRANSMISSION
+// ================================
+
+async function transmitData() {
+
+    if(isTransmitting) return;
+
+    isTransmitting = true;
+
+    const transmitBtn =
+        document.getElementById("transmitBtn");
+
+    transmitBtn.disabled = true;
+
+    logTerminal(
+        "Starting parallel communication..."
+    );
+
+
+    // Convert bits to decimal
+
+    let decimalValue = 0;
+
+    for(let i = 0; i < 8; i++) {
+
+        decimalValue +=
+            bitState[i] * Math.pow(2,i);
+    }
+
+
+    const binary =
+        bitState.slice().reverse().join("");
+
+
+    logTerminal(
+        `Data Bus D7-D0 = ${binary}`
+    );
+
+
+    // STROBE
+
+    await sleep(500);
+
+    setSignal("ind-strobe",true);
+
+    logTerminal(
+        "TX → STROBE ACTIVE: Data available"
+    );
+
+    recordWaveformPoint(1,0,0);
+
+
+    // BUSY
+
+    await sleep(600);
+
+    setSignal("ind-busy",true);
+
+    logTerminal(
+        "RX → BUSY ACTIVE: Receiving data"
+    );
+
+    recordWaveformPoint(1,1,0);
+
+
+    // LATCH DATA
+
+    await sleep(600);
+
+    updateReceiver(
+        decimalValue,
+        binary
+    );
+
+    logTerminal(
+        "RX → Data latched successfully"
+    );
+
+
+    // STROBE OFF
+
+    await sleep(400);
+
+    setSignal("ind-strobe",false);
+
+    recordWaveformPoint(0,1,0);
+
+
+    // BUSY OFF + ACK
+
+    await sleep(400);
+
+    setSignal("ind-busy",false);
+
+    setSignal("ind-ack",true);
+
+    logTerminal(
+        "RX → ACK pulse generated"
+    );
+
+    recordWaveformPoint(0,0,1);
+
+
+    // ACK OFF
+
+    await sleep(500);
+
+    setSignal("ind-ack",false);
+
+    recordWaveformPoint(0,0,0);
+
+    logTerminal(
+        "Transmission complete. Bus is IDLE."
+    );
+
+
+    transmitBtn.disabled = false;
+
+    isTransmitting = false;
+}
+
+
+// ================================
+// RECEIVER UPDATE
+// ================================
+
+function updateReceiver(decimalValue,binary) {
+
+    // LEDs
+
+    for(let i = 0; i < 8; i++) {
+
+        const led =
+            document.getElementById(`led-${i}`);
+
+        if(bitState[i] === 1) {
+
+            led.classList.add("on");
+
+        } else {
+
+            led.classList.remove("on");
+        }
+    }
+
+
+    // Binary
+
+    document.getElementById("readout-bin")
+        .innerText = binary;
+
+
+    // Hexadecimal
+
+    document.getElementById("readout-hex")
+        .innerText =
+        "0x" +
+        decimalValue
+            .toString(16)
+            .toUpperCase()
+            .padStart(2,"0");
+
+
+    // Decimal
+
+    document.getElementById("readout-dec")
+        .innerText = decimalValue;
+
+
+    // ASCII
+
+    let ascii = "NUL";
+
+    if(decimalValue >= 32 &&
+       decimalValue <= 126) {
+
+        ascii =
+            "'" +
+            String.fromCharCode(decimalValue) +
+            "'";
+
+    } else if(decimalValue === 10) {
+
+        ascii = "\\n";
+
+    } else if(decimalValue === 13) {
+
+        ascii = "\\r";
+    }
+
+    document.getElementById("readout-ascii")
+        .innerText = ascii;
+}
+
+
+// ================================
+// DELAY
+// ================================
+
+function sleep(ms) {
+
+    return new Promise(
+        resolve => setTimeout(resolve,ms)
+    );
+}
+
+
+// ================================
+// WAVEFORM
+// ================================
+
+const canvas =
+    document.getElementById("waveformCanvas");
+
+const ctx =
+    canvas.getContext("2d");
+
+
+function recordWaveformPoint(
+    strobe,
+    busy,
+    ack
+) {
+
+    waveformHistory.push({
+
+        strobe: strobe,
+
+        busy: busy,
+
+        ack: ack,
+
+        data: bitState[0]
+
+    });
+
+    if(waveformHistory.length > 20) {
+
+        waveformHistory.shift();
+    }
+
+    drawWaveform();
+}
+
+
+// ================================
+// DRAW WAVEFORM
+// ================================
+
+function drawWaveform() {
+
+    canvas.width =
+        canvas.offsetWidth;
+
+    canvas.height =
+        canvas.offsetHeight;
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    const signals = [
+
+        {
+            name:"DATA",
+            key:"data"
+        },
+
+        {
+            name:"STROBE",
+            key:"strobe"
+        },
+
+        {
+            name:"BUSY",
+            key:"busy"
+        },
+
+        {
+            name:"ACK",
+            key:"ack"
+        }
+
+    ];
+
+
+    const rowHeight =
+        canvas.height / signals.length;
+
+
+    signals.forEach((signal,index) => {
+
+        const top =
+            index * rowHeight;
+
+        const highY =
+            top + 20;
+
+        const lowY =
+            top + rowHeight - 20;
+
+
+        // Horizontal divider
+
+        ctx.strokeStyle =
+            "#334155";
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            top
+        );
+
+        ctx.lineTo(
+            canvas.width,
+            top
+        );
+
+        ctx.stroke();
+
+
+        // Label
+
+        ctx.fillStyle =
+            "#94a3b8";
+
+        ctx.font =
+            "12px Arial";
+
+        ctx.fillText(
+            signal.name,
+            10,
+            top + 15
+        );
+
+
+        if(waveformHistory.length === 0)
+            return;
+
+
+        const width =
+            canvas.width /
+            waveformHistory.length;
+
+
+        ctx.strokeStyle =
+            "#22c55e";
+
+        ctx.lineWidth = 2;
+
+        ctx.beginPath();
+
+
+        waveformHistory.forEach(
+            (point,i) => {
+
+                const value =
+                    point[signal.key];
+
+                const x =
+                    i * width;
+
+                const y =
+                    value
+                    ? highY
+                    : lowY;
+
+
+                if(i === 0) {
+
+                    ctx.moveTo(x,y);
+
+                } else {
+
+                    const previous =
+                        waveformHistory[i-1]
+                        [signal.key];
+
+                    const previousY =
+                        previous
+                        ? highY
+                        : lowY;
+
+
+                    if(previousY !== y) {
+
+                        ctx.lineTo(
+                            x,
+                            previousY
+                        );
+
+                        ctx.lineTo(
+                            x,
+                            y
+                        );
+
+                    } else {
+
+                        ctx.lineTo(
+                            x,
+                            y
+                        );
+                    }
+                }
+
+            }
+        );
+
+        ctx.stroke();
+
+    });
+}
+
+
+// Draw initial waveform
+
+drawWaveform();
+
+
+// Redraw when screen size changes
+
+window.addEventListener(
+    "resize",
+    drawWaveform
+);
+
+</script>
+
+</body>
+  </html>
